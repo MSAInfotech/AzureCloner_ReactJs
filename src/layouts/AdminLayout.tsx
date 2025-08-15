@@ -2,7 +2,6 @@
 
 import React from "react"
 import { Link, useLocation,useNavigate,Outlet } from "react-router-dom"
-import { useMsal } from "@azure/msal-react"
 import {
   LayoutDashboard,
   Database,
@@ -90,7 +89,7 @@ const Layout: React.FC<LayoutProps> = () => {
         </div>
 
         <main className="flex-1">
-          <div className="py-6">
+          <div className="py-0">
             <div className="px-4 sm:px-6 lg:px-8"><Outlet /></div>
           </div>
         </main>
