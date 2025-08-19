@@ -1,19 +1,10 @@
 "use client"
 
 import React from "react"
-import { Link, useLocation,useNavigate,Outlet } from "react-router-dom"
-import {
-  LayoutDashboard,
-  Database,
-  GitBranch,
-  Settings,
-  LogOut,
-  Menu,
-  X,
-} from "lucide-react"
+import { Link, useLocation, useNavigate, Outlet } from "react-router-dom"
+import { LayoutDashboard, Database, GitBranch, Settings, LogOut, Menu, Cloud, X } from "lucide-react"
 
-interface LayoutProps {
-}
+type LayoutProps = {}
 
 const Layout: React.FC<LayoutProps> = () => {
   const location = useLocation()
@@ -45,52 +36,65 @@ const Layout: React.FC<LayoutProps> = () => {
   const toggleSidebar = () => setSidebarOpen((prev) => !prev)
 
   return (
-    <div className="min-h-screen bg-gray-50 relative overflow-x-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 relative overflow-x-hidden">
       {/* Sidebar */}
       <div
-        className={`fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-md transform transition-transform duration-300 ease-in-out ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed inset-y-0 left-0 z-50 w-72 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 backdrop-blur-xl shadow-2xl border-r border-slate-700/60 transform transition-all duration-300 ease-out ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
-        <div className="flex justify-between items-center px-4 pt-4">
-          <span className="text-xl font-semibold text-gray-900">Menu</span>
-          <button onClick={() => setSidebarOpen(false)}>
-            <X className="h-6 w-6 text-gray-500 hover:text-gray-700" />
+        <div className="flex items-center justify-between p-6 border-b border-slate-200/60 bg-gradient-to-r from-blue-50/50 to-indigo-50/50">
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-700 rounded-2xl flex items-center justify-center shadow-lg ring-2 ring-blue-100 transition-transform hover:scale-105">
+              <Cloud onClick={() => navigate("/")} className="w-7 h-7 text-white cursor-pointer" />
+            </div>
+            <div>
+              <h1
+                onClick={() => navigate("/")}
+                className="text-xl font-bold bg-gradient-to-r from-blue-400 via-indigo-400 to-sky-300 bg-clip-text text-transparent cursor-pointer hover:from-blue-300 hover:to-indigo-200 transition-all"
+              >
+                Azure Cloner
+              </h1>
+              <p className="text-sm text-slate-300 font-medium">Deployment Platform</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setSidebarOpen(false)}
+             className="absolute top-3 right-3 p-2 rounded-full hover:bg-gray-700 transition"
+          >
+            <X className="w-5 h-5 text-gray-300 hover:text-white" />
           </button>
         </div>
-        <SidebarContent
-          navigation={navigation}
-          currentPath={location.pathname}
-          onLogout={handleLogout}
-        />
+        <SidebarContent navigation={navigation} currentPath={location.pathname} onLogout={handleLogout} />
       </div>
 
       {/* Backdrop */}
       {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-30 bg-black/30"
-          onClick={() => setSidebarOpen(false)}
-        />
+        <div className="fixed inset-0 z-30 bg-black/40 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
       )}
 
       {/* Top bar + Main content */}
       <div className="relative z-10">
-        <div className="sticky top-0 z-30 bg-white px-4 py-3 shadow-sm flex items-center">
+        <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-xl px-6 py-4 shadow-sm border-b border-slate-200/60 flex items-center">
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-md text-gray-500 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-xl text-slate-600 hover:text-slate-800 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 transition-all duration-200"
             onClick={toggleSidebar}
           >
             <Menu className="h-6 w-6" />
           </button>
-          <h1 className="ml-4 text-xl font-semibold text-indigo-700">
-            {navigation.find((nav) => nav.href === location.pathname)?.name ?? ""}
-          </h1>
+          <div className="ml-4">
+            <h1 className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+              {navigation.find((nav) => nav.href === location.pathname)?.name ?? ""}
+            </h1>
+            <p className="text-sm text-slate-500 font-medium">Azure Resource Management</p>
+          </div>
         </div>
 
         <main className="flex-1">
           <div className="py-0">
-            <div className="px-4 sm:px-6 lg:px-8"><Outlet /></div>
+            <div className="px-4 sm:px-6 lg:px-8">
+              <Outlet />
+            </div>
           </div>
         </main>
       </div>
@@ -109,43 +113,42 @@ interface SidebarContentProps {
 }
 
 const SidebarContent: React.FC<SidebarContentProps> = ({ navigation, currentPath, onLogout }) => {
-  const navigate = useNavigate()
   return (
     <>
-      <div className="flex flex-1 flex-col pt-5 pb-4 overflow-y-auto">
-        <div className="flex items-center px-4">
-          <div onClick={() => navigate("/")} className="text-2xl font-bold text-blue-700">Azure Cloner</div>
-        </div>
-        <nav className="mt-6 space-y-1 px-2">
-          {navigation.map((item) => {
-            const isActive = currentPath === item.href
-            return (
-              <Link
-                key={item.name}
-                to={item.href}
-                className={`group flex items-center rounded-md px-2 py-2 text-sm font-medium transition-all duration-150 border-l-4 ${
-                  isActive
-                    ? "bg-indigo-50 text-indigo-700 border-indigo-600"
-                    : "text-gray-600 hover:bg-sky-50 hover:text-sky-800 border-transparent"
+      <nav className="mt-8 space-y-2 px-4">
+        {navigation.map((item) => {
+          const isActive = currentPath === item.href
+          return (
+            <Link
+              key={item.name}
+              to={item.href}
+              className={`group flex items-center rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-200 ${isActive
+                ? "bg-gradient-to-r from-blue-600/30 to-indigo-600/30 text-blue-300 border-l-4 border-blue-400 shadow-md"
+                : "text-slate-300 hover:bg-gradient-to-r hover:from-blue-500/20 hover:to-indigo-500/20 hover:text-blue-200 hover:border-l-4 hover:border-blue-400"
                 }`}
-              >
-                <item.icon
-                  className={`mr-3 h-5 w-5 flex-shrink-0 ${
-                    isActive ? "text-indigo-500" : "text-gray-400 group-hover:text-sky-600"
+            >
+              <div
+                className={`mr-4 p-2 rounded-lg transition-all duration-200 ${isActive
+                  ? "bg-blue-600/30 text-blue-300"
+                  : "bg-slate-700 text-slate-400 group-hover:bg-blue-600/30 group-hover:text-blue-200"
                   }`}
-                />
-                {item.name}
-              </Link>
-            )
-          })}
-        </nav>
-      </div>
-      <div className="flex-shrink-0 flex border-t border-gray-200 p-4">
+              >
+                <item.icon className="h-5 w-5 flex-shrink-0" />
+              </div>
+              <span className="font-medium">{item.name}</span>
+            </Link>
+          )
+        })}
+      </nav>
+
+      <div className="absolute bottom-0 left-0 right-0 border-t border-slate-700/60 bg-gradient-to-r from-slate-800/40 to-slate-900/40 p-4">
         <button
           onClick={onLogout}
-          className="flex items-center text-sm text-gray-600 hover:text-red-600 w-full"
+          className="flex items-center text-sm text-slate-200 hover:text-red-400 w-full px-4 py-3 rounded-xl hover:bg-gradient-to-r hover:from-red-600/20 hover:to-pink-600/20 transition-all duration-200 font-medium"
         >
-          <LogOut className="mr-3 h-5 w-5" />
+          <div className="mr-4 p-2 rounded-lg bg-slate-700 text-slate-300 group-hover:bg-red-600/30 group-hover:text-red-400 transition-all duration-200">
+            <LogOut className="h-5 w-5" />
+          </div>
           Sign out
         </button>
       </div>

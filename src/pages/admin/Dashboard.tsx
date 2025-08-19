@@ -10,12 +10,9 @@ import {
   CheckCircle,
   Clock,
   AlertCircle,
-  Cloud,
   Server,
   Zap,
-  TrendingUp,
   Globe,
-  RefreshCw,
   ExternalLink,
   DollarSign,
   Gauge,
@@ -31,18 +28,19 @@ import { Badge } from "@components/admin/ui/Badge"
 import { Progress } from "@/components/admin/ui/Progress"
 
 const Dashboard: React.FC = () => {
-  const { connections, deploymentJobs, resources } = useStore()
+  // const { connections, deploymentJobs, resources } = useStore()
+  const { deploymentJobs } = useStore()
 
-  
   const [azureConnections] = useState([
     { id: 1, name: "Production Subscription", status: "connected", region: "East US", resourceCount: 24 },
     { id: 2, name: "Development Subscription", status: "connected", region: "West Europe", resourceCount: 12 },
     { id: 3, name: "Staging Subscription", status: "error", region: "Central US", resourceCount: 8 },
   ])
   const activeConnections = azureConnections.filter((c) => c.status === "connected").length
+  const failedConnections = azureConnections.filter((c) => c.status === "error").length
   const runningJobs = deploymentJobs.filter((j) => j.status === "running").length
-  const completedJobs = deploymentJobs.filter((j) => j.status === "completed").length
-  const totalResources = resources.length
+  // const completedJobs = deploymentJobs.filter((j) => j.status === "completed").length
+  // const totalResources = resources.length
 
   const recentActivity = [
     { type: "success", message: "Production connection validated", time: "2m ago" },
@@ -79,307 +77,301 @@ const Dashboard: React.FC = () => {
   ])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-100/50 relative overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.05),transparent_50%)]" />
-      <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(59,130,246,0.02)_50%,transparent_75%)]" />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50 relative">
+      {/* Background pattern */}
+      <div
+        className="absolute inset-0 opacity-20"
+        style={{
+          backgroundImage: `radial-gradient(circle at 1px 1px, rgb(148 163 184 / 0.15) 1px, transparent 0)`,
+          backgroundSize: "22px 22px",
+        }}
+      ></div>
 
-      <div className="bg-gradient-to-r from-white/95 via-white/90 to-blue-50/95 backdrop-blur-2xl border-b border-slate-200/40 sticky top-0 z-10 shadow-lg shadow-slate-200/20">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 via-transparent to-indigo-600/5" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 relative">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-            <div className="flex items-center space-x-4">
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl blur-lg opacity-30" />
-                <div className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-700 p-4 rounded-3xl shadow-2xl shadow-blue-500/30 ring-1 ring-white/20">
-                  <Cloud className="h-7 w-7 text-white drop-shadow-sm" />
-                </div>
-              </div>
-              <div className="space-y-1">
-                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 bg-clip-text text-transparent tracking-tight">
-                  Azure Resource Manager
-                </h1>
-                <p className="text-sm sm:text-base text-slate-600 font-semibold tracking-wide">
-                  Monitor and manage your Azure infrastructure with precision
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              {/* <Button
-                variant="outline"
-                size="default"
-                className="gap-3 bg-white/90 backdrop-blur-sm border-slate-300/50 hover:bg-white hover:border-blue-400/60 hover:shadow-lg hover:shadow-blue-500/20 transition-all duration-300 shadow-md font-semibold text-slate-700 hover:text-blue-700 px-6 py-2.5 rounded-2xl"
-              >
-                <RefreshCw className="h-4 w-4" />
-                <span className="hidden sm:inline">Refresh Data</span>
-                <span className="sm:hidden">Refresh</span>
-              </Button> */}
-            </div>
+      <div className="relative p-6 lg:p-12 space-y-8">
+        {/* Header - matching Azure connections style */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+          <div>
+            <h1 className="text-4xl font-extrabold bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent">
+              Azure Resource Manager
+            </h1>
+            <p className="text-slate-600 text-lg font-medium">
+              Monitor and manage your Azure infrastructure with precision
+            </p>
           </div>
         </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-8 relative">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          <StatCard
-            title="Active Connections"
-            value={activeConnections}
-            icon={Shield}
-            color="text-emerald-600"
-            bgColor="bg-gradient-to-br from-emerald-50 to-teal-50"
-          />
-          <StatCard
-            title="Total Resources"
-            value={totalResources}
-            icon={Database}
-            color="text-blue-600"
-            bgColor="bg-gradient-to-br from-blue-50 to-indigo-50"
-          />
-          <StatCard
-            title="Running Jobs"
-            value={runningJobs}
-            icon={Activity}
-            color="text-amber-600"
-            bgColor="bg-gradient-to-br from-amber-50 to-orange-50"
-          />
-          <StatCard
-            title="Monthly Cost"
-            value={activeConnections}
-            icon={TrendingUp}
-            color="text-purple-600"
-            bgColor="bg-gradient-to-br from-purple-50 to-pink-50"
-          />
+        {/* Stats cards - matching Azure connections style */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[
+            {
+              label: "ACTIVE CONNECTIONS",
+              count: activeConnections,
+              icon: CheckCircle,
+              bgColor: "bg-emerald-500",
+              textColor: "text-white",
+            },
+            {
+              label: "FAILED CONNECTIONS",
+              count: failedConnections,
+              icon: AlertCircle,
+              bgColor: "bg-rose-500",
+              textColor: "text-white",
+            },
+            {
+              label: "TOTAL CONNECTIONS",
+              count: azureConnections.length,
+              icon: Database,
+              bgColor: "bg-indigo-500",
+              textColor: "text-white",
+            },
+            {
+              label: "RUNNING JOBS",
+              count: runningJobs,
+              icon: Activity,
+              bgColor: "bg-blue-500",
+              textColor: "text-white",
+            },
+          ].map((stat, i) => (
+            <div
+              key={i}
+              className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100"
+            >
+              <div className="flex items-center gap-4">
+                <div className={`${stat.bgColor} rounded-2xl p-4 shadow-sm`}>
+                  <stat.icon className={`h-6 w-6 ${stat.textColor}`} />
+                </div>
+                <div className="flex-1">
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">{stat.label}</p>
+                  <p className="text-2xl font-bold text-slate-900">{stat.count}</p>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
-
-        {/* Azure Subscriptions
-        <Card className="bg-white/80 backdrop-blur-sm border-slate-200 shadow-lg">
-          <CardHeader className="pb-4">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <CardTitle className="flex items-center gap-2">
-                <Globe className="h-5 w-5 text-blue-600" />
-                Azure Subscriptions
-              </CardTitle>
-              <Badge variant="secondary" className="bg-blue-100 text-blue-700">
-                {activeConnections} Connected
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {connections.map((connection) => (
-              <div
-                key={connection.id}
-                className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200 gap-4"
-              >
-                <div className="flex items-center space-x-4">
-                  <div
-                    className={`p-2 rounded-lg ${connection.status === "connected" ? "bg-emerald-100" : "bg-red-100"}`}
-                  >
-                    {connection.status === "connected" ? (
-                      <CheckCircle className="h-5 w-5 text-emerald-600" />
-                    ) : (
-                      <AlertCircle className="h-5 w-5 text-red-600" />
-                    )}
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Badge variant={connection.status === "connected" ? "default" : "destructive"}>
-                    {connection.status}
-                  </Badge>
-                  <Button variant="ghost" size="sm">
-                    <ExternalLink className="h-4 w-4" />
-                  </Button>
-                </div>
+        {/* Resource Overview - matching card style */}
+        <Card className="overflow-hidden bg-white/80 backdrop-blur-xl border-0 shadow-xl hover:shadow-2xl transition-all duration-500 rounded-2xl">
+          <CardHeader className="bg-gradient-to-r from-slate-50 to-blue-50/50 border-b border-slate-200/50 p-6">
+            <CardTitle className="text-xl font-bold text-slate-900 flex items-center gap-3">
+              <div className="bg-indigo-500 rounded-lg p-2">
+                <Server className="h-5 w-5 text-white" />
               </div>
-            ))}
-          </CardContent>
-        </Card> */}
-        {/* Azure Subscriptions */}
-        <Card className="bg-white/90 backdrop-blur-xl border-slate-200/60 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-slate-200/60 transition-all duration-300">
-          <CardHeader className="pb-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <CardTitle className="flex items-center gap-3">
-                <div className="p-2 bg-blue-50 rounded-xl">
-                  <Globe className="h-5 w-5 text-blue-600" />
-                </div>
-                <span className="font-bold text-slate-900">Azure Subscriptions</span>
-              </CardTitle>
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl blur-sm opacity-20" />
-                <Badge className="relative bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold shadow-lg shadow-emerald-500/30 px-4 py-2 rounded-2xl border-0 hover:shadow-xl hover:shadow-emerald-500/40 transition-all duration-300">
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  {activeConnections} Connected
-                </Badge>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {azureConnections.map((connection) => (
-              <div
-                key={connection.id}
-                className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 bg-slate-50/80 rounded-3xl border border-slate-200/60 gap-4 hover:bg-slate-100/80 hover:border-slate-300/60 hover:shadow-lg transition-all duration-300"
-              >
-                <div className="flex items-center space-x-4">
-                  <div
-                    className={`p-3 rounded-2xl shadow-lg ${connection.status === "connected" ? "bg-gradient-to-br from-emerald-100 to-teal-100 shadow-emerald-500/20" : "bg-gradient-to-br from-red-100 to-rose-100 shadow-red-500/20"}`}
-                  >
-                    {connection.status === "connected" ? (
-                      <CheckCircle className="h-6 w-6 text-emerald-600" />
-                    ) : (
-                      <AlertCircle className="h-6 w-6 text-red-600" />
-                    )}
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-slate-900 text-lg">{connection.name}</h3>
-                    <p className="text-sm text-slate-600 font-semibold">
-                      {connection.region} • {connection.resourceCount} resources
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-4">
-                  {connection.status === "connected" ? (
-                    <div className="relative">
-                      <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl blur-sm opacity-20" />
-                      <Badge className="relative bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold shadow-lg shadow-emerald-500/30 px-4 py-2 rounded-2xl border-0 hover:shadow-xl hover:shadow-emerald-500/40 transition-all duration-300 capitalize">
-                        <CheckCircle className="h-3 w-3 mr-2" />
-                        Connected
-                      </Badge>
-                    </div>
-                  ) : (
-                    <div className="relative">
-                      <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-rose-500 rounded-2xl blur-sm opacity-20" />
-                      <Badge className="relative bg-gradient-to-r from-red-500 to-rose-500 text-white font-bold shadow-lg shadow-red-500/30 px-4 py-2 rounded-2xl border-0 hover:shadow-xl hover:shadow-red-500/40 transition-all duration-300 capitalize">
-                        <AlertCircle className="h-3 w-3 mr-2" />
-                        Error
-                      </Badge>
-                    </div>
-                  )}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="hover:bg-slate-200/60 hover:shadow-md transition-all duration-300 rounded-2xl p-3"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-
-        {/* Resource Overview and Recent Activity
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-          <Card className="bg-white/80 backdrop-blur-sm border-slate-200 shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Server className="h-5 w-5 text-indigo-600" />
-                Resource Overview
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {resources.map((resource, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                   
-                    <div>
-                      <p className="font-medium text-slate-900">{resource.type}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs text-slate-500">monthly</p>
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card> */}
-
-        {/* Resource Overview - Full Width */}
-        <Card className="bg-white/90 backdrop-blur-xl border-slate-200/60 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-slate-200/60 transition-all duration-300">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-3">
-              <div className="p-2 bg-indigo-50 rounded-xl">
-                <Server className="h-5 w-5 text-indigo-600" />
-              </div>
-              <span className="font-bold text-slate-900">Resource Overview</span>
+              Resource Overview
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <CardContent className="p-6">
+            <div className="space-y-4">
               {azureResources.map((resource, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between p-4 bg-slate-50/80 rounded-xl border border-slate-200/60 hover:bg-slate-100/80 transition-all duration-200"
+                  className="group hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-colors duration-300 p-4 rounded-xl border border-slate-100"
                 >
-                  <div className="flex items-center space-x-4">
-                    <div
-                      className={`w-4 h-4 rounded-full shadow-sm ${resource.status === "healthy"
-                        ? "bg-emerald-500 shadow-emerald-500/30"
-                        : resource.status === "warning"
-                          ? "bg-amber-500 shadow-amber-500/30"
-                          : "bg-red-500 shadow-red-500/30"
-                        }`}
-                    />
-                    <div>
-                      <p className="font-semibold text-slate-900">{resource.type}</p>
-                      <p className="text-sm text-slate-600 font-medium">{resource.count} instances</p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-3 h-3 rounded-full ${resource.status === "healthy"
+                          ? "bg-emerald-500"
+                          : resource.status === "warning"
+                            ? "bg-orange-500"
+                            : "bg-rose-500"
+                          }`}
+                      />
+                      <div>
+                        <p className="text-sm font-semibold text-slate-900">{resource.type}</p>
+                        <p className="text-xs text-slate-500">{resource.count} instances</p>
+                      </div>
                     </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-bold text-slate-900">{resource.cost}</p>
-                    <p className="text-xs text-slate-500 font-medium">monthly</p>
+                    <div className="text-right">
+                      <p className="text-sm font-bold text-slate-900">{resource.cost}</p>
+                      <p className="text-xs text-slate-500">monthly</p>
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
           </CardContent>
         </Card>
+        {/* Cost Optimization Recommendations */}
+        <Card className="overflow-hidden bg-white/80 backdrop-blur-xl border-0 shadow-xl hover:shadow-2xl transition-all duration-500 rounded-2xl">
+          <CardHeader className="bg-gradient-to-r from-slate-50 to-blue-50/50 border-b border-slate-200/50 p-6">
+            <CardTitle className="text-xl font-bold text-slate-900 flex items-center gap-3">
+              <div className="bg-emerald-500 rounded-lg p-2">
+                <DollarSign className="h-5 w-5 text-white" />
+              </div>
+              Cost Optimization Recommendations
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {costOptimization.map((rec, index) => (
+                <div
+                  key={index}
+                  className="group hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-colors duration-300 p-5 rounded-2xl border border-slate-100"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <h4 className="text-sm font-bold text-slate-900 leading-relaxed">{rec.recommendation}</h4>
+                    <Badge
+                      className={`text-xs font-semibold shadow-sm px-2.5 py-1 rounded-md ${rec.impact === "High"
+                        ? "bg-emerald-100 text-emerald-800"
+                        : rec.impact === "Medium"
+                          ? "bg-orange-100 text-orange-800"
+                          : "bg-slate-100 text-slate-800"
+                        }`}
+                    >
+                      {rec.impact}
+                    </Badge>
+                  </div>
+                  <p className="text-xl font-bold text-emerald-600">{rec.savings}/month</p>
+                  <p className="text-xs text-slate-500 font-medium">Potential savings</p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Azure Subscriptions - matching table style */}
+        <Card className="overflow-hidden bg-white/80 backdrop-blur-xl border-0 shadow-xl hover:shadow-2xl transition-all duration-500 rounded-2xl">
+          <CardHeader className="bg-gradient-to-r from-slate-50 to-blue-50/50 border-b border-slate-200/50 p-6">
+            <CardTitle className="text-xl font-bold text-slate-900 flex items-center gap-3">
+              <div className="bg-blue-500 rounded-lg p-2">
+                <Globe className="h-5 w-5 text-white" />
+              </div>
+              Azure Subscriptions
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <table className="min-w-full">
+                <thead>
+                  <tr className="bg-gradient-to-r from-slate-50 to-slate-100">
+                    {["Connection", "Environment", "Status", "Last Validated", "Actions"].map((text) => (
+                      <th
+                        key={text}
+                        className={`px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider ${text === "Actions" ? "text-right" : ""
+                          }`}
+                      >
+                        {text}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {azureConnections.map((connection) => (
+                    <tr
+                      key={connection.id}
+                      className="group hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-colors duration-300"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-3">
+                          {connection.status === "connected" ? (
+                            <CheckCircle className="h-5 w-5 text-emerald-500" />
+                          ) : (
+                            <AlertCircle className="h-5 w-5 text-rose-500" />
+                          )}
+                          <div>
+                            <div className="text-sm font-semibold text-slate-900">{connection.name}</div>
+                            <div className="text-xs text-slate-500">
+                              {connection.region} • {connection.resourceCount} resources
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <Badge className="bg-blue-50 text-blue-700 border-blue-200 border px-2.5 py-1 rounded-md text-xs font-medium">
+                          Development
+                        </Badge>
+                      </td>
+                      <td className="px-6 py-4">
+                        <Badge
+                          className={`px-3 py-1 rounded-full text-xs font-semibold shadow-sm ${connection.status === "connected"
+                            ? "bg-emerald-100 text-emerald-800"
+                            : "bg-rose-100 text-rose-800"
+                            }`}
+                        >
+                          {connection.status === "connected" ? "Connected" : "Error"}
+                        </Badge>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-slate-600">2025-08-14T07:18:29.745696</td>
+                      <td className="px-6 py-4 text-right">
+                        <Button variant="ghost" size="sm" className="hover:bg-slate-200/60 rounded-lg p-2">
+                          <ExternalLink className="h-4 w-4" />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+
+
+
+        {/* Two column layout for Security and Performance */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="bg-white/90 backdrop-blur-xl border-slate-200/60 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-slate-200/60 transition-all duration-300">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5 text-red-600" />
+          <Card className="overflow-hidden bg-white/80 backdrop-blur-xl border-0 shadow-xl hover:shadow-2xl transition-all duration-500 rounded-2xl">
+            <CardHeader className="bg-gradient-to-r from-slate-50 to-blue-50/50 border-b border-slate-200/50 p-6">
+              <CardTitle className="text-xl font-bold text-slate-900 flex items-center gap-3">
+                <div className="bg-rose-500 rounded-lg p-2">
+                  <Shield className="h-5 w-5 text-white" />
+                </div>
                 Security Insights
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="p-6 space-y-4">
               {securityInsights.map((insight, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div
-                      className={`w-3 h-3 rounded-full ${insight.severity === "high"
-                        ? "bg-red-500"
-                        : insight.severity === "medium"
-                          ? "bg-amber-500"
-                          : insight.severity === "low"
-                            ? "bg-yellow-500"
-                            : "bg-blue-500"
-                        }`}
-                    />
-                    <div>
-                      <p className="font-medium text-slate-900">{insight.type}</p>
-                      <p className="text-sm text-slate-600">{insight.description}</p>
+                <div
+                  key={index}
+                  className="group hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-colors duration-300 p-4 rounded-xl border border-slate-100"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-3 h-3 rounded-full ${insight.severity === "high"
+                          ? "bg-rose-500"
+                          : insight.severity === "medium"
+                            ? "bg-orange-500"
+                            : insight.severity === "low"
+                              ? "bg-yellow-500"
+                              : "bg-blue-500"
+                          }`}
+                      />
+                      <div>
+                        <p className="text-sm font-semibold text-slate-900">{insight.type}</p>
+                        <p className="text-xs text-slate-500">{insight.description}</p>
+                      </div>
                     </div>
+                    <Badge
+                      className={`px-3 py-1 rounded-full text-xs font-semibold shadow-sm ${insight.severity === "high" ? "bg-rose-100 text-rose-800" : "bg-slate-100 text-slate-800"
+                        }`}
+                    >
+                      {insight.count}
+                    </Badge>
                   </div>
-                  <Badge variant={insight.severity === "high" ? "destructive" : "secondary"} className="text-xs">
-                    {insight.count}
-                  </Badge>
                 </div>
               ))}
             </CardContent>
           </Card>
-          <Card className="bg-white/90 backdrop-blur-xl border-slate-200/60 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-slate-200/60 transition-all duration-300">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-2">
-                <Gauge className="h-5 w-5 text-blue-600" />
+
+          <Card className="overflow-hidden bg-white/80 backdrop-blur-xl border-0 shadow-xl hover:shadow-2xl transition-all duration-500 rounded-2xl">
+            <CardHeader className="bg-gradient-to-r from-slate-50 to-blue-50/50 border-b border-slate-200/50 p-6">
+              <CardTitle className="text-xl font-bold text-slate-900 flex items-center gap-3">
+                <div className="bg-blue-500 rounded-lg p-2">
+                  <Gauge className="h-5 w-5 text-white" />
+                </div>
                 Performance Metrics
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="p-6 space-y-4">
               {performanceMetrics.map((metric, index) => (
                 <div key={index} className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-slate-900">{metric.name}</span>
+                    <span className="text-sm font-semibold text-slate-900">{metric.name}</span>
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-slate-600">{metric.value}%</span>
-                      <Badge variant={metric.status === "warning" ? "destructive" : "secondary"} className="text-xs">
+                      <Badge
+                        className={`px-2.5 py-1 rounded-md text-xs font-medium ${metric.status === "warning" ? "bg-red-100" : "bg-slate-100"
+                          }`}
+                      >
                         {metric.trend}
                       </Badge>
                     </div>
@@ -394,91 +386,70 @@ const Dashboard: React.FC = () => {
           </Card>
         </div>
 
-
-        {/* Recent Activity - Full Width */}
-        <Card className="bg-white/90 backdrop-blur-xl border-slate-200/60 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-slate-200/60 transition-all duration-300">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Activity className="h-5 w-5 text-green-600" />
+        {/* Recent Activity */}
+        <Card className="overflow-hidden bg-white/80 backdrop-blur-xl border-0 shadow-xl hover:shadow-2xl transition-all duration-500 rounded-2xl">
+          <CardHeader className="bg-gradient-to-r from-slate-50 to-blue-50/50 border-b border-slate-200/50 p-6">
+            <CardTitle className="text-xl font-bold text-slate-900 flex items-center gap-3">
+              <div className="bg-emerald-500 rounded-lg p-2">
+                <Activity className="h-5 w-5 text-white" />
+              </div>
               Recent Activity
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4 max-h-96 overflow-y-auto">
+          <CardContent className="p-6 space-y-4 max-h-96 overflow-y-auto">
             {recentActivity.map((activity, index) => (
-              <div key={index} className="flex items-start space-x-3">
-                <div
-                  className={`p-2 rounded-lg ${activity.type === "success"
-                    ? "bg-emerald-100"
-                    : activity.type === "warning"
-                      ? "bg-amber-100"
-                      : activity.type === "error"
-                        ? "bg-red-100"
-                        : "bg-blue-100"
-                    }`}
-                >
-
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-900">{activity.message}</p>
-                  <p className="text-xs text-slate-500">{activity.time}</p>
+              <div
+                key={index}
+                className="group hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-colors duration-300 p-4 rounded-xl border border-slate-100"
+              >
+                <div className="flex items-start gap-3">
+                  <div
+                    className={`p-2 rounded-lg ${activity.type === "success"
+                      ? "bg-emerald-100"
+                      : activity.type === "warning"
+                        ? "bg-orange-100"
+                        : activity.type === "error"
+                          ? "bg-rose-100"
+                          : "bg-blue-100"
+                      }`}
+                  >
+                    {activity.type === "success" ? (
+                      <CheckCircle className="h-5 w-5 text-emerald-600" />
+                    ) : activity.type === "warning" ? (
+                      <AlertCircle className="h-5 w-5 text-orange-600" />
+                    ) : (
+                      <AlertCircle className="h-5 w-5 text-rose-600" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-slate-900">{activity.message}</p>
+                    <p className="text-xs text-slate-500">{activity.time}</p>
+                  </div>
                 </div>
               </div>
             ))}
           </CardContent>
         </Card>
 
-        {/* Cost Optimization Recommendations */}
-        <Card className="bg-white/90 backdrop-blur-xl border-slate-200/60 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-slate-200/60 transition-all duration-300">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-3">
-              <div className="p-2 bg-green-50 rounded-xl">
-                <DollarSign className="h-5 w-5 text-green-600" />
-              </div>
-              <span className="font-bold text-slate-900">Cost Optimization Recommendations</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {costOptimization.map((rec, index) => (
-                <div
-                  key={index}
-                  className="p-5 bg-gradient-to-br from-green-50/80 to-emerald-50/80 rounded-2xl border border-green-200/60 shadow-sm hover:shadow-md hover:border-green-300/60 transition-all duration-200"
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <h4 className="font-bold text-slate-900 text-sm leading-relaxed">{rec.recommendation}</h4>
-                    <Badge
-                      variant={rec.impact === "High" ? "default" : rec.impact === "Medium" ? "secondary" : "outline"}
-                      className="text-xs font-semibold shadow-sm"
-                    >
-                      {rec.impact}
-                    </Badge>
-                  </div>
-                  <p className="text-xl font-bold text-green-600">{rec.savings}/month</p>
-                  <p className="text-xs text-slate-600 font-medium">Potential savings</p>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Active Deployments */}
         {runningJobs > 0 && (
-          <Card className="bg-white/90 backdrop-blur-xl border-slate-200/60 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-slate-200/60 transition-all duration-300">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3">
-                <div className="p-2 bg-orange-50 rounded-xl">
-                  <Zap className="h-5 w-5 text-orange-600" />
+          <Card className="overflow-hidden bg-white/80 backdrop-blur-xl border-0 shadow-xl hover:shadow-2xl transition-all duration-500 rounded-2xl">
+            <CardHeader className="bg-gradient-to-r from-slate-50 to-blue-50/50 border-b border-slate-200/50 p-6">
+              <CardTitle className="text-xl font-bold text-slate-900 flex items-center gap-3">
+                <div className="bg-orange-500 rounded-lg p-2">
+                  <Zap className="h-5 w-5 text-white" />
                 </div>
-                <span className="font-bold text-slate-900">Active Deployments</span>
+                Active Deployments
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="p-6 space-y-6">
               {deploymentJobs
                 .filter((job) => job.status === "running")
                 .map((job) => (
                   <div
                     key={job.id}
-                    className="p-5 bg-gradient-to-br from-slate-50/80 to-blue-50/80 rounded-2xl border border-slate-200/60 shadow-sm hover:shadow-md transition-all duration-200"
+                    className="group hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-colors duration-300 p-5 rounded-2xl border border-slate-100"
                   >
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3">
                       <div className="flex items-center space-x-4">
@@ -486,11 +457,11 @@ const Dashboard: React.FC = () => {
                           <Clock className="h-4 w-4 text-blue-600" />
                         </div>
                         <div>
-                          <h3 className="font-bold text-slate-900">{job.name}</h3>
-                          <p className="text-sm text-slate-600 font-medium">Deploying {job.resources.join(", ")}</p>
+                          <h3 className="text-sm font-bold text-slate-900">{job.name}</h3>
+                          <p className="text-xs text-slate-500 font-medium">Deploying {job.resources.join(", ")}</p>
                         </div>
                       </div>
-                      <Badge variant="secondary" className="bg-blue-100/80 text-blue-700 font-semibold shadow-sm">
+                      <Badge className="bg-blue-100 text-blue-700 font-semibold shadow-sm px-2.5 py-1 rounded-md text-xs">
                         {job.progress}%
                       </Badge>
                     </div>
@@ -504,40 +475,5 @@ const Dashboard: React.FC = () => {
     </div>
   )
 }
-interface StatCardProps {
-  title: string
-  value: number
-  icon: React.ComponentType<{ className?: string }>
-  color: string
-  bgColor: string
-}
 
-const StatCard: React.FC<StatCardProps> = ({
-  title,
-  value,
-  icon: Icon,
-  color,
-  bgColor,
-}) => {
-  return (
-    <Card
-      className={`${bgColor} border-slate-200/60 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-slate-200/60 transition-all duration-300 backdrop-blur-xl`}
-    ><CardContent className="p-4 sm:p-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3 sm:space-x-4">
-            <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-3 shadow-lg shadow-slate-200/50">
-              <Icon className={`h-5 w-5 sm:h-6 sm:w-6 ${color}`} />
-            </div>
-            <div>
-              <p className="text-xs sm:text-sm font-bold text-slate-700 uppercase tracking-wide">{title}</p>
-              <div className="flex items-baseline space-x-2">
-                <p className="text-lg sm:text-2xl font-bold text-slate-900">{value}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
 export default Dashboard
