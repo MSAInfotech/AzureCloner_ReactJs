@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
+const baseUrl = process.env.REACT_APP_API_BASE_URL
 
 const Signup = () => {
     const navigate = useNavigate();
@@ -38,7 +39,7 @@ const Signup = () => {
         }
 
         try {
-            const response = await fetch("https://localhost:7245/api/Auth/signup", {
+            const response = await fetch(`${baseUrl}/api/Auth/signup`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(formData),

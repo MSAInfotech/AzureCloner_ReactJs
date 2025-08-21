@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+const baseUrl = process.env.REACT_APP_API_BASE_URL
 
 const ForgotPassword = () => {
     const [email, setEmail] = useState("");
@@ -29,7 +30,7 @@ const ForgotPassword = () => {
 
         try {
             const res = await fetch(
-                `https://localhost:7245/api/Auth/forgotPassword?email=${encodeURIComponent(email)}`,
+                `${baseUrl}/api/Auth/forgotPassword?email=${encodeURIComponent(email)}`,
                 {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },

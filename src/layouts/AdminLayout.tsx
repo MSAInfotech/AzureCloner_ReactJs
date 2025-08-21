@@ -59,7 +59,7 @@ const Layout: React.FC<LayoutProps> = () => {
           </div>
           <button
             onClick={() => setSidebarOpen(false)}
-             className="absolute top-3 right-3 p-2 rounded-full hover:bg-gray-700 transition"
+            className="absolute top-3 right-3 p-2 rounded-full hover:bg-gray-700 transition"
           >
             <X className="w-5 h-5 text-gray-300 hover:text-white" />
           </button>
@@ -82,11 +82,29 @@ const Layout: React.FC<LayoutProps> = () => {
           >
             <Menu className="h-6 w-6" />
           </button>
-          <div className="ml-4">
+          {/* <div className="ml-4">
             <h1 className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
               {navigation.find((nav) => nav.href === location.pathname)?.name ?? ""}
             </h1>
             <p className="text-sm text-slate-500 font-medium">Azure Resource Management</p>
+          </div> */}
+          <div
+            onClick={() => navigate("/")}
+            className="flex items-center space-x-3 cursor-pointer ml-4"
+          >
+            {/* Logo Icon */}
+            <div className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-500 
+                  rounded-xl flex items-center justify-center shadow-md ring-2 ring-indigo-100 
+                  transition-transform hover:scale-105">
+              <Cloud className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+            </div>
+
+            {/* Logo Text */}
+            <h1 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 
+                 bg-clip-text text-transparent hover:from-blue-400 hover:to-indigo-400 transition-all 
+                 whitespace-nowrap">
+              Azure Cloner
+            </h1>
           </div>
         </div>
 

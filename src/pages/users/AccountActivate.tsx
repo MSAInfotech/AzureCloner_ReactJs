@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+const baseUrl = process.env.REACT_APP_API_BASE_URL
 
 const AccountActivate = () => {
   const location = useLocation();
@@ -16,10 +17,9 @@ const AccountActivate = () => {
       setMessage("Invalid activation link.");
       return;
     }
-
     const activateAccount = async () => {
       try {
-        const response = await fetch(`https://localhost:7245/api/Auth/activate?token=${encodeURIComponent(token)}`);
+        const response = await fetch(`${baseUrl}/api/Auth/activate?token=${encodeURIComponent(token)}`);
 
         if (response.ok) {
           const result = await response.text();

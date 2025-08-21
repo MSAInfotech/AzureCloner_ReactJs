@@ -16,6 +16,8 @@ import {
   ExternalLink,
   DollarSign,
   Gauge,
+  Radar,
+  Rocket
 } from "lucide-react"
 import {
   Card,
@@ -104,17 +106,17 @@ const Dashboard: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
             {
-              label: "ACTIVE CONNECTIONS",
+              label: "DISCOVERY CONNECTIONS",
               count: activeConnections,
-              icon: CheckCircle,
+              icon: Radar,
               bgColor: "bg-emerald-500",
               textColor: "text-white",
             },
             {
-              label: "FAILED CONNECTIONS",
+              label: "DEPLOYMENT CONNECTIONS",
               count: failedConnections,
-              icon: AlertCircle,
-              bgColor: "bg-rose-500",
+              icon: Rocket,
+              bgColor: "bg-violet-500",
               textColor: "text-white",
             },
             {
@@ -134,10 +136,10 @@ const Dashboard: React.FC = () => {
           ].map((stat, i) => (
             <div
               key={i}
-              className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100"
+              className="bg-white rounded-xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.08)] hover:shadow-[0_6px_24px_rgba(0,0,0,0.12)] transition-all duration-300"
             >
               <div className="flex items-center gap-4">
-                <div className={`${stat.bgColor} rounded-2xl p-4 shadow-sm`}>
+                <div className={`${stat.bgColor} rounded-xl p-4`}>
                   <stat.icon className={`h-6 w-6 ${stat.textColor}`} />
                 </div>
                 <div className="flex-1">

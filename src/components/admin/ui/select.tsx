@@ -22,34 +22,17 @@ interface SelectProps {
 
 const Select: React.FC<SelectProps> = ({ value, onValueChange, disabled, children }) => {
   const [isOpen, setIsOpen] = React.useState(false)
-  const selectRef = React.useRef<HTMLDivElement>(null)
-
-  React.useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (isOpen && selectRef.current && !selectRef.current.contains(event.target as Node)) {
-        setIsOpen(false)
-      }
-    }
-
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside)
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [isOpen])
 
   return (
     <SelectContext.Provider value={{ value, onValueChange, disabled, isOpen, setIsOpen }}>
-      <div ref={selectRef} className="relative">
+      <div className="relative w-full">
         {children}
       </div>
     </SelectContext.Provider>
   )
 }
 
-interface SelectTriggerProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {}
+interface SelectTriggerProps extends React.ButtonHTMLAttributes<HTMLButtonElement> { }
 
 const SelectTrigger = React.forwardRef<HTMLButtonElement, SelectTriggerProps>(
   ({ className, children, ...props }, ref) => {
@@ -65,7 +48,10 @@ const SelectTrigger = React.forwardRef<HTMLButtonElement, SelectTriggerProps>(
       <button
         ref={ref}
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={(e) => {
+          e.stopPropagation()
+          setIsOpen(!isOpen)  // toggle open/close
+        }}
         disabled={disabled}
         className={cn(
           "flex w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
@@ -109,38 +95,13 @@ interface SelectContentProps {
 
 const SelectContent: React.FC<SelectContentProps> = ({ className, children }) => {
   const context = React.useContext(SelectContext)
-  const [position, setPosition] = React.useState({ top: 0, left: 0, width: 0 })
   const contentRef = React.useRef<HTMLDivElement>(null)
 
   if (!context) {
     throw new Error("SelectContent must be used within a Select")
   }
 
-  const { isOpen } = context
-
-  React.useEffect(() => {
-    if (isOpen) {
-      const selectElement = contentRef.current?.parentElement?.querySelector("button")
-      if (selectElement) {
-        const rect = selectElement.getBoundingClientRect()
-        const viewportHeight = window.innerHeight
-        const dropdownHeight = 200 // Approximate dropdown height
-
-        let top = rect.bottom + window.scrollY
-
-        // Check if dropdown would go below viewport on mobile
-        if (rect.bottom + dropdownHeight > viewportHeight) {
-          top = rect.top + window.scrollY - dropdownHeight
-        }
-
-        setPosition({
-          top,
-          left: rect.left + window.scrollX,
-          width: rect.width,
-        })
-      }
-    }
-  }, [isOpen])
+  const { isOpen, setIsOpen } = context
 
   if (!isOpen) {
     return null
@@ -148,24 +109,22 @@ const SelectContent: React.FC<SelectContentProps> = ({ className, children }) =>
 
   return (
     <>
-      <div className="fixed inset-0 z-[9998]" style={{ backgroundColor: "transparent" }} />
+      {/* Overlay for closing on outside click */}
+      <div
+        className="fixed inset-0 z-[9998]"
+        onClick={() => setIsOpen(false)}
+      />
       <div
         ref={contentRef}
         className={cn(
-          "fixed z-[9999] min-w-[8rem] max-h-60 overflow-auto rounded-md border bg-white dark:bg-gray-800 p-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none",
+          "absolute z-[9999] min-w-[8rem] max-h-60 overflow-auto rounded-md border bg-white dark:bg-gray-800 p-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none",
           "sm:text-sm",
           className,
         )}
         style={{
-          position: "fixed",
-          top: `${position.top}px`,
-          left: `${position.left}px`,
-          width: `${position.width}px`,
-          zIndex: 9999,
-          backgroundColor: "white",
-          border: "1px solid #e5e7eb",
-          borderRadius: "6px",
-          boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+          top: "100%", // directly below trigger
+          left: 0,
+          width: "100%", // match trigger width
         }}
       >
         {children}

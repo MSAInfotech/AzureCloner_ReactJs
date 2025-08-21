@@ -175,7 +175,7 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({ onSubmit, onCancel }) =
   }
 
   return (
-    <Dialog open={true} onOpenChange={() => {}}>
+    <Dialog open={true} onOpenChange={() => { }}>
       <DialogContent
         className="!p-0 w-[95vw] max-w-md sm:max-w-lg md:max-w-xl bg-white dark:bg-gray-900 border-0 shadow-2xl rounded-2xl [&>button]:hidden flex flex-col"
         style={{
@@ -277,8 +277,8 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({ onSubmit, onCancel }) =
                   className={cn(
                     "h-11 sm:h-12 px-3 sm:px-4 bg-rose-50 dark:bg-gray-800 border border-rose-200 dark:border-gray-600 rounded-lg focus:border-rose-300 dark:focus:border-purple-400 focus:ring-2 focus:ring-rose-100 dark:focus:ring-purple-400/20 font-mono text-xs sm:text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400",
                     errors.tenantId &&
-                      touched.tenantId &&
-                      "border-red-300 dark:border-red-500 bg-red-50 dark:bg-red-900/20",
+                    touched.tenantId &&
+                    "border-red-300 dark:border-red-500 bg-red-50 dark:bg-red-900/20",
                   )}
                   disabled={isSubmitting}
                 />
@@ -311,8 +311,8 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({ onSubmit, onCancel }) =
                   className={cn(
                     "h-11 sm:h-12 px-3 sm:px-4 bg-rose-50 dark:bg-gray-800 border border-rose-200 dark:border-gray-600 rounded-lg focus:border-rose-300 dark:focus:border-purple-400 focus:ring-2 focus:ring-rose-100 dark:focus:ring-purple-400/20 font-mono text-xs sm:text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400",
                     errors.subscriptionId &&
-                      touched.subscriptionId &&
-                      "border-red-300 dark:border-red-500 bg-red-50 dark:bg-red-900/20",
+                    touched.subscriptionId &&
+                    "border-red-300 dark:border-red-500 bg-red-50 dark:bg-red-900/20",
                   )}
                   disabled={isSubmitting}
                 />
@@ -346,8 +346,8 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({ onSubmit, onCancel }) =
                 className={cn(
                   "h-11 sm:h-12 px-3 sm:px-4 bg-rose-50 dark:bg-gray-800 border border-rose-200 dark:border-gray-600 rounded-lg focus:border-rose-300 dark:focus:border-purple-400 focus:ring-2 focus:ring-rose-100 dark:focus:ring-purple-400/20 font-mono text-xs sm:text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400",
                   errors.clientId &&
-                    touched.clientId &&
-                    "border-red-300 dark:border-red-500 bg-red-50 dark:bg-red-900/20",
+                  touched.clientId &&
+                  "border-red-300 dark:border-red-500 bg-red-50 dark:bg-red-900/20",
                 )}
                 disabled={isSubmitting}
               />
@@ -383,8 +383,8 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({ onSubmit, onCancel }) =
                     className={cn(
                       "h-11 sm:h-12 px-3 sm:px-4 pr-10 sm:pr-12 bg-rose-50 dark:bg-gray-800 border border-rose-200 dark:border-gray-600 rounded-lg focus:border-rose-300 dark:focus:border-purple-400 focus:ring-2 focus:ring-rose-100 dark:focus:ring-purple-400/20 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 text-sm sm:text-base",
                       errors.clientSecret &&
-                        touched.clientSecret &&
-                        "border-red-300 dark:border-red-500 bg-red-50 dark:bg-red-900/20",
+                      touched.clientSecret &&
+                      "border-red-300 dark:border-red-500 bg-red-50 dark:bg-red-900/20",
                     )}
                     disabled={isSubmitting}
                   />
@@ -450,8 +450,8 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({ onSubmit, onCancel }) =
                     className={cn(
                       "h-11 sm:h-12 px-3 sm:px-4 bg-rose-50 dark:bg-gray-800 border border-rose-200 dark:border-gray-600 rounded-lg focus:border-rose-300 dark:focus:border-purple-400 focus:ring-2 focus:ring-rose-100 dark:focus:ring-purple-400/20 text-gray-900 dark:text-gray-100 text-sm sm:text-base",
                       errors.environment &&
-                        touched.environment &&
-                        "border-red-300 dark:border-red-500 bg-red-50 dark:bg-red-900/20",
+                      touched.environment &&
+                      "border-red-300 dark:border-red-500 bg-red-50 dark:bg-red-900/20",
                     )}
                   >
                     <SelectValue placeholder="Development" />
