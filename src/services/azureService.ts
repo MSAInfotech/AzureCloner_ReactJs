@@ -24,6 +24,7 @@ export interface AzureResource {
   tags: Record<string, string>
   properties: any
   dependencies: string[]
+  kind?: string
 }
 
 export interface DeploymentJob {
@@ -201,6 +202,7 @@ class AzureService {
             tags: resource.tags || {},
             properties: resource.properties || {},
             dependencies: await this.analyzeDependencies(resource.id, resourceClient),
+            kind: resource.kind
           }
           resources.push(azureResource)
         }
@@ -244,6 +246,7 @@ class AzureService {
         location: resource.location,
         tags: resource.tags,
         properties: resource.properties,
+        kind: resource.kind,
       })),
       outputs: {},
     }

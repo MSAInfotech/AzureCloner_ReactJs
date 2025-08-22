@@ -30,7 +30,8 @@ interface FilterState {
   search: string
   resourceType: string
   resourceGroup: string
-  location: string
+  location: string,
+  dependencies: string
 }
 
 const ResourceDiscovery: React.FC = () => {
@@ -50,6 +51,7 @@ const ResourceDiscovery: React.FC = () => {
     resourceType: "",
     resourceGroup: "",
     location: "",
+    dependencies: "",
   })
   const [showFilters, setShowFilters] = useState(false)
   const [currentPage, setCurrentPage] = useState(0)
@@ -157,7 +159,9 @@ const ResourceDiscovery: React.FC = () => {
       const matchesLocation =
         !filters.location || resource.location.toLowerCase().includes(filters.location.toLowerCase())
 
-      return matchesSearch && matchesResourceType && matchesResourceGroup && matchesLocation
+      const matchesDependencies =
+        !filters.dependencies || resource.dependencies.length.toString() === filters.dependencies;
+      return matchesSearch && matchesResourceType && matchesResourceGroup && matchesLocation && matchesDependencies
     })
   }, [resources, filters])
 
@@ -172,6 +176,7 @@ const ResourceDiscovery: React.FC = () => {
       resourceType: "",
       resourceGroup: "",
       location: "",
+      dependencies: "",
     })
     setCurrentPage(0)
   }
@@ -181,6 +186,7 @@ const ResourceDiscovery: React.FC = () => {
   const uniqueResourceTypes = Array.from(new Set(resources.map((r) => r.type)))
   const uniqueResourceGroups = Array.from(new Set(resources.map((r) => r.resourceGroup)))
   const uniqueLocations = Array.from(new Set(resources.map((r) => r.location)))
+  const uniqueDependencies = Array.from(new Set(resources.map((r) => r.dependencies.length)))
 
   const pageCount = Math.ceil(filteredResources.length / itemsPerPage)
   const paginatedResources = useMemo(() => {
@@ -240,7 +246,7 @@ const ResourceDiscovery: React.FC = () => {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <Button
+            {/* <Button
               variant="outline"
               onClick={() => selectedConnection && discoverResources(selectedConnection.id)}
               disabled={!selectedConnection || isDiscovering}
@@ -248,7 +254,7 @@ const ResourceDiscovery: React.FC = () => {
             >
               <RefreshCw className={`h-4 w-4 ${isDiscovering ? "animate-spin" : ""}`} />
               Refresh
-            </Button>
+            </Button> */}
             <Button
               onClick={exportSelected}
               disabled={selectedResources.length === 0}
@@ -268,7 +274,7 @@ const ResourceDiscovery: React.FC = () => {
               Select Connection
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-6 space-y-4">
+          <CardContent className="!p-6 space-y-4">
             <div className="flex flex-col lg:flex-row lg:items-center gap-4">
               <div className="relative w-full lg:max-w-md xl:max-w-lg">
                 <select
@@ -394,7 +400,7 @@ const ResourceDiscovery: React.FC = () => {
                     Clear
                   </Button>
                 )}
-                <div className="flex items-center space-x-2">
+                {/* <div className="flex items-center space-x-2">
                   <input
                     type="checkbox"
                     checked={selectedResources.length === paginatedResources.length && paginatedResources.length > 0}
@@ -402,12 +408,12 @@ const ResourceDiscovery: React.FC = () => {
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded"
                   />
                   <label className="text-sm text-slate-600 font-medium">Select All</label>
-                </div>
+                </div> */}
               </div>
             </div>
 
             {showFilters && (
-              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-6 bg-white/60 backdrop-blur-sm rounded-xl border border-slate-200/60 shadow-sm">
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 p-6 bg-white/60 backdrop-blur-sm rounded-xl border border-slate-200/60 shadow-sm">
                 <div className="space-y-2">
                   <Label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Search</Label>
                   <div className="relative">
@@ -507,19 +513,60 @@ const ResourceDiscovery: React.FC = () => {
                     </SelectContent>
                   </Select>
                 </div>
+
+                <div className="space-y-2">
+                  <Label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">DEPENDENCIES</Label>
+                  <Select
+                    value={filters.dependencies}
+                    onValueChange={(value) => updateFilter("dependencies", value === "all" ? "" : value)}
+                  >
+                    <SelectTrigger className="h-10 text-sm border-slate-200 focus:border-blue-400 focus:ring-blue-400/20 rounded-lg bg-white hover:bg-slate-50 transition-colors">
+                      <SelectValue placeholder="All dependencies" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl border-slate-200 shadow-xl bg-white/95 backdrop-blur-sm p-1">
+                      <SelectItem
+                        value="all"
+                        className="rounded-lg hover:bg-blue-50 focus:bg-blue-50 cursor-pointer transition-colors"
+                      >
+                        All dependencies
+                      </SelectItem>
+                      {uniqueDependencies.map((dependencies) => (
+                        <SelectItem
+                          key={dependencies}
+                          value={dependencies.toString()}
+                          className="rounded-lg hover:bg-blue-50 focus:bg-blue-50 cursor-pointer transition-colors"
+                        >
+                          {dependencies}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
               </div>
             )}
           </CardHeader>
-          <CardContent className="p-0">
+          <CardContent className="!p-0">
             <div className="overflow-x-auto">
               <table className="min-w-full">
                 <thead>
-                  <tr className="bg-gradient-to-r from-slate-50 to-slate-100">
-                    {["SELECT", "RESOURCE NAME", "TYPE", "RESOURCE GROUP", "LOCATION", "DEPENDENCIES", "TAGS"].map(
+                  <tr className="bg-gradient-to-r from-slate-50 to-slate-100 text-center">
+                    <th className="px-6 py-4 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={selectedResources.length === paginatedResources.length && paginatedResources.length > 0}
+                          onChange={handleSelectAll}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded"
+                        />
+                        <span>SELECT</span>
+                      </div>
+                    </th>
+                    {["RESOURCE NAME", "TYPE", "RESOURCE GROUP", "LOCATION", "DEPENDENCIES", "KIND"].map(
                       (text) => (
                         <th
                           key={text}
-                          className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider"
+                          className="px-6 py-4 text-center text-xs font-bold text-slate-600 uppercase tracking-wider"
                         >
                           {text}
                         </th>
@@ -553,7 +600,7 @@ const ResourceDiscovery: React.FC = () => {
                           key={resource.id}
                           className="group hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-colors duration-300"
                         >
-                          <td className="px-6 py-4">
+                          <td className="px-6 py-4 text-center">
                             <input
                               type="checkbox"
                               checked={selectedResources.includes(resource.id)}
@@ -561,7 +608,7 @@ const ResourceDiscovery: React.FC = () => {
                               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded"
                             />
                           </td>
-                          <td className="px-6 py-4">
+                          <td className="px-6 py-4 text-center">
                             <div className="flex items-center gap-3">
                               <div className="p-2 bg-slate-100 rounded-xl shadow-sm">
                                 {getResourceIcon(resource.type)}
@@ -569,8 +616,8 @@ const ResourceDiscovery: React.FC = () => {
                               <div className="text-sm font-semibold text-slate-900">{resource.name}</div>
                             </div>
                           </td>
-                          <td className="px-6 py-4 text-sm text-slate-600 font-mono">{resource.type}</td>
-                          <td className="px-6 py-4">
+                          <td className="px-6 py-4 text-sm text-slate-600 font-mono text-center">{resource.type}</td>
+                          <td className="px-6 py-4 text-center">
                             <Badge
                               className={`font-medium px-3 py-1 text-xs rounded-full shadow-sm ${resource.resourceGroup.toLowerCase().includes("dev") ||
                                 resource.resourceGroup.toLowerCase().includes("development")
@@ -590,29 +637,35 @@ const ResourceDiscovery: React.FC = () => {
                               {resource.resourceGroup}
                             </Badge>
                           </td>
-                          <td className="px-6 py-4">
+                          <td className="px-6 py-4 text-center">
                             <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 border font-medium px-3 py-1 text-xs rounded-full shadow-sm">
                               {resource.location}
                             </Badge>
                           </td>
-                          <td className="px-6 py-4">
+                          <td className="px-6 py-4 text-center">
                             <Badge className="bg-slate-50 text-slate-700 border-slate-200 border text-xs px-2 py-1 rounded-md">
                               {resource.dependencies.length}
                             </Badge>
                           </td>
-                          <td className="px-6 py-4 max-w-[300px]">
-                            <div className="flex gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100 px-1">
-                              {Object.entries(resource.tags).map(([key, value]) => (
-                                <Badge
-                                  key={key}
-                                  variant="outline"
-                                  className="text-xs shrink-0 border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors duration-200 px-2 py-1 rounded-md"
-                                >
-                                  {key}: {value}
-                                </Badge>
-                              ))}
-                            </div>
+                          <td className="px-6 py-4 text-center">
+                            {resource.kind &&
+                              <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 border font-medium px-3 py-1 text-xs rounded-full shadow-sm">
+                                {resource.kind}
+                              </Badge>}
                           </td>
+                          {/* <td className="px-6 py-4 max-w-[300px]">
+                          <div className="flex gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100 px-1">
+                            {Object.entries(resource.tags).map(([key, value]) => (
+                              <Badge
+                                key={key}
+                                variant="outline"
+                                className="text-xs shrink-0 border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors duration-200 px-2 py-1 rounded-md"
+                              >
+                                {key}: {value}
+                              </Badge>
+                            ))}
+                          </div>
+                        </td> */}
                         </tr>
                       ))
                     )}
