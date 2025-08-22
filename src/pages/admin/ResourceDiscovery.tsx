@@ -87,7 +87,7 @@ const ResourceDiscovery: React.FC = () => {
       setLoading(true)
       const result = await azureService.startDiscoverySession(subscriptionId, connectionId)
       const { session, discoveredResources } = result
-      showToast(`Discovery session started (ID: ${session.id})`, "success")
+      showToast(`Discovery session completed (ID: ${session.id})`, "success")
       setResources(discoveredResources || [])
     } catch (error) {
       setError(error instanceof Error ? error.message : "Failed to start discover resources")
@@ -95,6 +95,20 @@ const ResourceDiscovery: React.FC = () => {
     } finally {
       setLoading(false)
       setDiscovering(false)
+    }
+  }
+
+  const GetExistingDiscovery = async (subscriptionId: string, connectionId: string) => {
+    try {
+      const result = await azureService.GetExistingDiscovery(subscriptionId, connectionId)
+      const { discoveredResources } = result
+      if (!discoveredResources || discoveredResources.length === 0) {
+        showToast("No existing discovery found for this connection.", "error")
+      }
+      setResources(discoveredResources || [])
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Failed to start discover resources")
+      showToast("Failed to start discover resources", "error")
     }
   }
 
@@ -259,9 +273,12 @@ const ResourceDiscovery: React.FC = () => {
               <div className="relative w-full lg:max-w-md xl:max-w-lg">
                 <select
                   value={selectedConnection?.id || ""}
-                  onChange={(e) => {
+                  onChange={async (e) => {
                     const conn = connections.find((c) => c.id === e.target.value)
                     setSelectedConnection(conn ?? null)
+                    if (conn) {
+                      await GetExistingDiscovery(conn.subscriptionId, conn.id)
+                    }
                   }}
                   className="w-full appearance-none bg-white border border-slate-300 rounded-lg px-3 py-2 pr-8 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm h-10"
                 >
@@ -295,25 +312,29 @@ const ResourceDiscovery: React.FC = () => {
           {[
             {
               label: "Total Resources",
-              count: filteredResources.length,
+              count: !selectedConnection || isDiscovering ? 0 : filteredResources.length,
               icon: Cloud,
               gradient: "from-blue-500 to-blue-600",
             },
             {
               label: "Selected",
-              count: selectedResources.length,
+              count: !selectedConnection || isDiscovering ? 0 : selectedResources.length,
               icon: Shield,
               gradient: "from-emerald-500 to-emerald-600",
             },
             {
               label: "Resource Groups",
-              count: new Set(filteredResources.map((r) => r.resourceGroup)).size,
+              count: !selectedConnection || isDiscovering
+                ? 0
+                : new Set(filteredResources.map((r) => r.resourceGroup)).size,
               icon: Database,
               gradient: "from-purple-500 to-purple-600",
             },
             {
               label: "Dependencies",
-              count: filteredResources.reduce((total, r) => total + r.dependencies.length, 0),
+              count: !selectedConnection || isDiscovering
+                ? 0
+                : filteredResources.reduce((total, r) => total + r.dependencies.length, 0),
               icon: Network,
               gradient: "from-orange-500 to-orange-600",
             },
@@ -506,96 +527,97 @@ const ResourceDiscovery: React.FC = () => {
                     )}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {filteredResources.length === 0 ? (
-                    <tr>
-                      <td colSpan={7} className="px-6 py-8 text-center">
-                        <div className="text-slate-500">
-                          {hasActiveFilters ? "No resources match your filters" : "No resources found"}
-                        </div>
-                        {hasActiveFilters && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={clearFilters}
-                            className="mt-2 text-blue-600 hover:text-blue-700"
-                          >
-                            Clear filters
-                          </Button>
-                        )}
-                      </td>
-                    </tr>
-                  ) : (
-                    paginatedResources.map((resource) => (
-                      <tr
-                        key={resource.id}
-                        className="group hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-colors duration-300"
-                      >
-                        <td className="px-6 py-4">
-                          <input
-                            type="checkbox"
-                            checked={selectedResources.includes(resource.id)}
-                            onChange={() => handleSelectResource(resource.id)}
-                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded"
-                          />
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 bg-slate-100 rounded-xl shadow-sm">
-                              {getResourceIcon(resource.type)}
-                            </div>
-                            <div className="text-sm font-semibold text-slate-900">{resource.name}</div>
+                {!(!selectedConnection || isDiscovering) && (
+                  <tbody className="divide-y divide-slate-100">
+                    {filteredResources.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="px-6 py-8 text-center">
+                          <div className="text-slate-500">
+                            {hasActiveFilters ? "No resources match your filters" : "No resources found"}
                           </div>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-slate-600 font-mono">{resource.type}</td>
-                        <td className="px-6 py-4">
-                          <Badge
-                            className={`font-medium px-3 py-1 text-xs rounded-full shadow-sm ${
-                              resource.resourceGroup.toLowerCase().includes("dev") ||
-                              resource.resourceGroup.toLowerCase().includes("development")
-                                ? "bg-blue-50 text-blue-700 border-blue-200"
-                                : resource.resourceGroup.toLowerCase().includes("staging") ||
-                                    resource.resourceGroup.toLowerCase().includes("stage")
-                                  ? "bg-indigo-50 text-indigo-700 border-indigo-200"
-                                  : resource.resourceGroup.toLowerCase().includes("test") ||
-                                      resource.resourceGroup.toLowerCase().includes("testing")
-                                    ? "bg-orange-50 text-orange-700 border-orange-200"
-                                    : resource.resourceGroup.toLowerCase().includes("prod") ||
-                                        resource.resourceGroup.toLowerCase().includes("production")
-                                      ? "bg-purple-50 text-purple-700 border-purple-200"
-                                      : "bg-slate-50 text-slate-700 border-slate-200"
-                            } border`}
-                          >
-                            {resource.resourceGroup}
-                          </Badge>
-                        </td>
-                        <td className="px-6 py-4">
-                          <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 border font-medium px-3 py-1 text-xs rounded-full shadow-sm">
-                            {resource.location}
-                          </Badge>
-                        </td>
-                        <td className="px-6 py-4">
-                          <Badge className="bg-slate-50 text-slate-700 border-slate-200 border text-xs px-2 py-1 rounded-md">
-                            {resource.dependencies.length}
-                          </Badge>
-                        </td>
-                        <td className="px-6 py-4 max-w-[300px]">
-                          <div className="flex gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100 px-1">
-                            {Object.entries(resource.tags).map(([key, value]) => (
-                              <Badge
-                                key={key}
-                                variant="outline"
-                                className="text-xs shrink-0 border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors duration-200 px-2 py-1 rounded-md"
-                              >
-                                {key}: {value}
-                              </Badge>
-                            ))}
-                          </div>
+                          {hasActiveFilters && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={clearFilters}
+                              className="mt-2 text-blue-600 hover:text-blue-700"
+                            >
+                              Clear filters
+                            </Button>
+                          )}
                         </td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
+                    ) : (
+                      paginatedResources.map((resource) => (
+                        <tr
+                          key={resource.id}
+                          className="group hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-colors duration-300"
+                        >
+                          <td className="px-6 py-4">
+                            <input
+                              type="checkbox"
+                              checked={selectedResources.includes(resource.id)}
+                              onChange={() => handleSelectResource(resource.id)}
+                              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded"
+                            />
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-slate-100 rounded-xl shadow-sm">
+                                {getResourceIcon(resource.type)}
+                              </div>
+                              <div className="text-sm font-semibold text-slate-900">{resource.name}</div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-slate-600 font-mono">{resource.type}</td>
+                          <td className="px-6 py-4">
+                            <Badge
+                              className={`font-medium px-3 py-1 text-xs rounded-full shadow-sm ${resource.resourceGroup.toLowerCase().includes("dev") ||
+                                resource.resourceGroup.toLowerCase().includes("development")
+                                ? "bg-blue-50 text-blue-700 border-blue-200"
+                                : resource.resourceGroup.toLowerCase().includes("staging") ||
+                                  resource.resourceGroup.toLowerCase().includes("stage")
+                                  ? "bg-indigo-50 text-indigo-700 border-indigo-200"
+                                  : resource.resourceGroup.toLowerCase().includes("test") ||
+                                    resource.resourceGroup.toLowerCase().includes("testing")
+                                    ? "bg-orange-50 text-orange-700 border-orange-200"
+                                    : resource.resourceGroup.toLowerCase().includes("prod") ||
+                                      resource.resourceGroup.toLowerCase().includes("production")
+                                      ? "bg-purple-50 text-purple-700 border-purple-200"
+                                      : "bg-slate-50 text-slate-700 border-slate-200"
+                                } border`}
+                            >
+                              {resource.resourceGroup}
+                            </Badge>
+                          </td>
+                          <td className="px-6 py-4">
+                            <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 border font-medium px-3 py-1 text-xs rounded-full shadow-sm">
+                              {resource.location}
+                            </Badge>
+                          </td>
+                          <td className="px-6 py-4">
+                            <Badge className="bg-slate-50 text-slate-700 border-slate-200 border text-xs px-2 py-1 rounded-md">
+                              {resource.dependencies.length}
+                            </Badge>
+                          </td>
+                          <td className="px-6 py-4 max-w-[300px]">
+                            <div className="flex gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100 px-1">
+                              {Object.entries(resource.tags).map(([key, value]) => (
+                                <Badge
+                                  key={key}
+                                  variant="outline"
+                                  className="text-xs shrink-0 border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors duration-200 px-2 py-1 rounded-md"
+                                >
+                                  {key}: {value}
+                                </Badge>
+                              ))}
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                )}
               </table>
 
               {filteredResources.length > 0 && (
