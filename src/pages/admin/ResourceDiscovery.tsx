@@ -84,21 +84,42 @@ const ResourceDiscovery: React.FC = () => {
   }
 
   const DiscoverySession = async (subscriptionId: string, connectionId: string) => {
-    try {
-      setDiscovering(true)
-      setLoading(true)
-      const result = await azureService.startDiscoverySession(subscriptionId, connectionId)
-      const { session, discoveredResources } = result
-      showToast(`Discovery session completed (ID: ${session.id})`, "success")
-      setResources(discoveredResources || [])
-    } catch (error) {
-      setError(error instanceof Error ? error.message : "Failed to start discover resources")
-      showToast("Failed to start discover resources", "error")
-    } finally {
-      setLoading(false)
-      setDiscovering(false)
-    }
+  try {
+    setDiscovering(true)
+    setLoading(true)
+
+    const { session } = await azureService.startDiscoverySession(subscriptionId, connectionId)
+    showToast(`Discovery session started (ID: ${session.id})`, "success")
+
+    // Start polling for status every 5 seconds
+    const pollingInterval = setInterval(async () => {
+      try {
+        const statusResult = await azureService.getDiscoveryStatus(session.id)
+
+        if (statusResult.status === 2) { // 2 = completed
+          clearInterval(pollingInterval) // Stop polling
+
+          const finalResources = await azureService.getDiscoveredResources(session.id)
+          setResources(finalResources)
+          showToast(`Discovered ${finalResources.length} resources`, "success")
+          setDiscovering(false)
+          setLoading(false)
+        }
+      } catch (err) {
+        clearInterval(pollingInterval)
+        setError("Failed to poll discovery status")
+        setDiscovering(false)
+        setLoading(false)
+        showToast("Error checking discovery status", "error")
+      }
+    }, 5000) // Poll every 5 seconds
+  } catch (error) {
+    setError(error instanceof Error ? error.message : "Failed to start discovery session")
+    showToast("Failed to start discovery session", "error")
+    setDiscovering(false)
+    setLoading(false)
   }
+}
 
   const GetExistingDiscovery = async (subscriptionId: string, connectionId: string) => {
     try {
