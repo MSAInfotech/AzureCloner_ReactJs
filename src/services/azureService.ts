@@ -51,7 +51,7 @@ export interface DiscoverySession {
   targetSubscriptionId: string
   resourceGroupFilters: string[]
   resourceTypeFilters: string[]
-  status: "InProgress" | "Completed" | "Failed"
+  status: number // 0: Pending, 1: InProgress, 2: Completed, 3: Failed
   completedAt?: string
   errorMessage?: string
 }
@@ -59,6 +59,7 @@ export interface DiscoverySession {
 class AzureService {
   private connections: Map<string, AzureConnection> = new Map()
   private resourceClients: Map<string, ResourceManagementClient> = new Map()
+  private pollingIntervals: Map<string, NodeJS.Timeout> = new Map()
 
   //Create and validate
   async validateAzureConnectionInline(
@@ -130,7 +131,7 @@ class AzureService {
     }
   }
 
-  async startDiscoverySession(subscriptionId: string, connectionId: string): Promise<any> {
+  async startDiscoverySession(subscriptionId: string, connectionId: string): Promise<DiscoveryResult> {
     const request = {
       sourceSubscriptionId: subscriptionId,
       connectionId: connectionId
@@ -173,7 +174,114 @@ class AzureService {
 
     return data as DiscoveryResult // session object
   }
+async getDiscoveryStatus(sessionId: string): Promise<DiscoverySession> {
+    const response = await fetch(`${baseUrl}/api/discovery/${sessionId}/status`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
 
+    const data = await response.json()
+    if (!response.ok) {
+      throw new Error(data?.error || "Failed to get discovery status")
+    }
+
+    return data
+  }
+
+  // New method to get discovered resources for a session
+  async getDiscoveredResources(sessionId: string): Promise<AzureResource[]> {
+    const response = await fetch(`${baseUrl}/api/discovery/${sessionId}/resources`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+
+    const data = await response.json()
+    if (!response.ok) {
+      throw new Error(data?.error || "Failed to get discovered resources")
+    }
+
+    return data
+  }
+
+  // New method to start polling for discovery completion
+  async startDiscoveryWithPolling(
+    subscriptionId: string, 
+    connectionId: string,
+    onStatusUpdate: (session: DiscoverySession) => void,
+    onResourcesDiscovered: (resources: AzureResource[]) => void,
+    onComplete: (session: DiscoverySession, resources: AzureResource[]) => void,
+    onError: (error: string) => void
+  ): Promise<DiscoveryResult> {
+    try {
+      // Start the discovery session
+      const result = await this.startDiscoverySession(subscriptionId, connectionId)
+      const sessionId = result.session.id
+
+      // Start polling for status updates
+      this.startPolling(sessionId, onStatusUpdate, onResourcesDiscovered, onComplete, onError)
+
+      return result
+    } catch (error) {
+      onError(error instanceof Error ? error.message : "Failed to start discovery")
+      throw error
+    }
+  }
+
+  private startPolling(
+    sessionId: string,
+    onStatusUpdate: (session: DiscoverySession) => void,
+    onResourcesDiscovered: (resources: AzureResource[]) => void,
+    onComplete: (session: DiscoverySession, resources: AzureResource[]) => void,
+    onError: (error: string) => void
+  ) {
+    // Clear any existing polling for this session
+    this.stopPolling(sessionId)
+
+    const pollInterval = setInterval(async () => {
+      try {
+        const session = await this.getDiscoveryStatus(sessionId)
+        onStatusUpdate(session)
+
+        // Check if discovery is complete (status: 2 = Completed)
+        if (session.status === 2) {
+          this.stopPolling(sessionId)
+          
+          // Fetch the discovered resources
+          const resources = await this.getDiscoveredResources(sessionId)
+          onResourcesDiscovered(resources)
+          onComplete(session, resources)
+          
+        } else if (session.status === 3) { // Failed
+          this.stopPolling(sessionId)
+          onError(session.errorMessage || "Discovery failed")
+        }
+      } catch (error) {
+        console.error("Polling error:", error)
+        this.stopPolling(sessionId)
+        onError(error instanceof Error ? error.message : "Polling failed")
+      }
+    }, 5000) // Poll every 5 seconds
+
+    this.pollingIntervals.set(sessionId, pollInterval)
+  }
+
+  public stopPolling(sessionId: string) {
+    const interval = this.pollingIntervals.get(sessionId)
+    if (interval) {
+      clearInterval(interval)
+      this.pollingIntervals.delete(sessionId)
+    }
+  }
+
+  // Clean up all polling intervals
+  public stopAllPolling() {
+    this.pollingIntervals.forEach(interval => clearInterval(interval))
+    this.pollingIntervals.clear()
+  }
   async discoverResources(connectionId: string): Promise<AzureResource[]> {
     const connection = this.connections.get(connectionId)
     if (!connection) {
