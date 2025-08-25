@@ -317,16 +317,16 @@ const ResourceDiscovery: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-6 w-full">
           {[
             {
-              label: "Total Resources",
-              count: !selectedConnection || isDiscovering ? 0 : filteredResources.length,
-              icon: Cloud,
-              gradient: "from-blue-500 to-blue-600",
-            },
-            {
               label: "Selected",
               count: !selectedConnection || isDiscovering ? 0 : selectedResources.length,
               icon: Shield,
               gradient: "from-emerald-500 to-emerald-600",
+            },
+            {
+              label: "Total Resources",
+              count: !selectedConnection || isDiscovering ? 0 : filteredResources.length,
+              icon: Cloud,
+              gradient: "from-blue-500 to-blue-600",
             },
             {
               label: "Resource Groups",
