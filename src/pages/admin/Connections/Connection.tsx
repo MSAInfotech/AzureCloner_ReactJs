@@ -4,7 +4,7 @@ import type React from "react"
 import { useState, useEffect, useMemo } from "react"
 import { useStore } from "@store/useStore"
 import { azureService } from "@services/azureService"
-import { Plus, Settings, Trash2, CheckCircle, AlertCircle, Search, X, Filter } from "lucide-react"
+import { Plus, Settings, Trash2, CheckCircle, AlertCircle, Search, X, Filter, Edit } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@components/admin/ui/Card"
 import { Button } from "@components/admin/ui/Button"
 import { Badge } from "@components/admin/ui/Badge"
@@ -12,6 +12,7 @@ import { Input } from "@components/admin/ui/Input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/admin/ui/select"
 import ConnectionForm from "@components/admin/ConnectionForm"
 import { Label } from "@components/admin/ui/label"
+import { useNavigate } from "react-router-dom"
 
 interface FilterState {
   connection: string
@@ -23,6 +24,7 @@ interface FilterState {
 const Connections: React.FC = () => {
   const { connections, setConnections, removeConnection, setLoading, setError, showToast } = useStore()
   const [showForm, setShowForm] = useState(false)
+  const navigate = useNavigate()
   const [filters, setFilters] = useState<FilterState>({
     connection: "",
     environment: "",
@@ -65,6 +67,14 @@ const Connections: React.FC = () => {
       } catch {
         showToast("Failed to delete connection", "error")
       }
+    }
+  }
+
+  const handleEditConnection = async (id: string) => {
+    try {
+      navigate(`/admin/connections/EditConnection/${id}`)
+    } catch {
+      showToast("Failed to delete connection", "error")
     }
   }
 
@@ -150,8 +160,6 @@ const Connections: React.FC = () => {
 
   const uniqueEnvironments = Array.from(new Set(connections.map((c) => c.environment)))
   const uniqueStatuses = Array.from(new Set(connections.map((c) => c.status)))
-  const [envOpen, setEnvOpen] = useState(false)
-  const [statusOpen, setStatusOpen] = useState(false)
 
   // Pagination logic
   const pageCount = Math.ceil(filteredConnections.length / itemsPerPage)
@@ -422,14 +430,24 @@ const Connections: React.FC = () => {
                           {connection.lastValidated.toLocaleString()}
                         </td>
                         <td className="px-4 lg:px-6 py-3 lg:py-4 text-right">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDeleteConnection(connection.id)}
-                            className="text-rose-600 hover:bg-rose-50 transition-all duration-200 p-2 rounded-lg"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          <div className="flex items-center justify-end gap-1 lg:gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEditConnection(connection.id)}
+                              className="text-blue-600 hover:bg-blue-50 transition-all duration-200 p-2 rounded-lg"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteConnection(connection.id)}
+                              className="text-rose-600 hover:bg-rose-50 transition-all duration-200 p-2 rounded-lg"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                     ))

@@ -56,13 +56,13 @@ const Deployments: React.FC = () => {
     addDeploymentJob,
     setLoading,
     connectionsWithDiscoverySessions,
-    getConnectionsWithDiscoverySessions
+    getConnectionsWithDiscoverySessions,
+    showToast
   } = useStore()
 
   const [selectedSourceEnv, setSelectedSourceEnv] = useState("")
   const [selectedTargetEnv, setSelectedTargetEnv] = useState("")
   const [deploymentName, setDeploymentName] = useState("")
-  const { showToast } = useStore()
 
   useEffect(() => {
     fetchConnections()

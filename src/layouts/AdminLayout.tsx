@@ -21,7 +21,7 @@ const Layout: React.FC<LayoutProps> = () => {
 
   const navigation = [
     { name: "Dashboard", href: "/admin/home", icon: LayoutDashboard },
-    { name: "Connections", href: "/admin/connection", icon: Database },
+    { name: "Connections", href: "/admin/Connections/Connection", icon: Database },
     { name: "Discovery", href: "/admin/discovery", icon: Settings },
     { name: "Deployments", href: "/admin/deployment", icon: GitBranch },
   ]

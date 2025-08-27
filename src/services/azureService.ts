@@ -55,6 +55,16 @@ export interface DiscoverySession {
   completedAt?: string
   errorMessage?: string
 }
+interface ConnectionFormData {
+  name: string
+  subscriptionId: string
+  tenantId: string
+  clientId?: string
+  clientSecret?: string
+  environment: string
+  latestSessionId: string
+}
+
 
 class AzureService {
   private connections: Map<string, AzureConnection> = new Map()
@@ -174,7 +184,7 @@ class AzureService {
 
     return data as DiscoveryResult // session object
   }
-async getDiscoveryStatus(sessionId: string): Promise<DiscoverySession> {
+  async getDiscoveryStatus(sessionId: string): Promise<DiscoverySession> {
     const response = await fetch(`${baseUrl}/api/discovery/${sessionId}/status`, {
       method: "GET",
       headers: {
@@ -209,7 +219,7 @@ async getDiscoveryStatus(sessionId: string): Promise<DiscoverySession> {
 
   // New method to start polling for discovery completion
   async startDiscoveryWithPolling(
-    subscriptionId: string, 
+    subscriptionId: string,
     connectionId: string,
     onStatusUpdate: (session: DiscoverySession) => void,
     onResourcesDiscovered: (resources: AzureResource[]) => void,
@@ -249,12 +259,12 @@ async getDiscoveryStatus(sessionId: string): Promise<DiscoverySession> {
         // Check if discovery is complete (status: 2 = Completed)
         if (session.status === 2) {
           this.stopPolling(sessionId)
-          
+
           // Fetch the discovered resources
           const resources = await this.getDiscoveredResources(sessionId)
           onResourcesDiscovered(resources)
           onComplete(session, resources)
-          
+
         } else if (session.status === 3) { // Failed
           this.stopPolling(sessionId)
           onError(session.errorMessage || "Discovery failed")
@@ -453,6 +463,53 @@ async getDiscoveryStatus(sessionId: string): Promise<DiscoverySession> {
     } catch (error) {
       console.error("Error fetching connections:", error);
       throw new Error("An error occurred while fetching connections");
+    }
+  }
+
+  async getConnectionById(connectionId: string): Promise<AzureConnection> {
+    try {
+      const response = await fetch(`${baseUrl}/api/connection/${connectionId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        return data.data as AzureConnection; 
+      } else {
+        console.error("Error while retrieving connection:", data.errors);
+        throw new Error(data.message || "Failed to retriev connection");
+      }
+    } catch (error) {
+      console.error("Error while retrieving connection:", error);
+      throw new Error("An error occurred while retrieving connection");
+    }
+  }
+
+  async updateConnectionById(connectionId: string, formData: ConnectionFormData): Promise<string> {
+    try {
+      const response = await fetch(`${baseUrl}/api/connection/${connectionId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        return data.message || "Connection updated successfully";
+      } else {
+        console.error("Error updating connection:", data.errors);
+        throw new Error(data.message || "Failed to update connection");
+      }
+    } catch (error) {
+      console.error("Error updating connection:", error);
+      throw new Error("An error occurred while updating connection");
     }
   }
 

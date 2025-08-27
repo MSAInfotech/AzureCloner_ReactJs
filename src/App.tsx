@@ -21,7 +21,8 @@ import MainLayout from "./layouts/MainLayout";
 import AdminLayout from "./layouts/AdminLayout";
 import DashboardHome from './pages/admin/Dashboard';
 import Deployment from './pages/admin/Deployments';
-import Connection from './pages/admin/Connections';
+import Connection from './pages/admin/Connections/Connection';
+import EditConnection from './pages/admin/Connections/EditConnection';
 import ResourceDiscovery from './pages/admin/ResourceDiscovery';
 import PrivateRoute from './components/users/PrivateRoute';
 
@@ -71,7 +72,8 @@ function App() {
           <Route path="/admin/home" element={<DashboardHome />} />
           <Route path="/admin/deployment" element={<Deployment />} />
           <Route path="/admin/discovery" element={<ResourceDiscovery />} />
-          <Route path="/admin/connection" element={<Connection />} />
+          <Route path="/admin/Connections/Connection" element={<Connection />} />
+          <Route path="/admin/connections/EditConnection/:id" element={<EditConnection />} />
         </Route>
 
         {/* Routes WITHOUT layout */}
